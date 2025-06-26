@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.uniandes.ciemi.utils.Constants
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -35,7 +36,7 @@ class LoginViewModel : ViewModel() {
         if (!validate()) {
             return
         }
-        val url = "http://10.0.2.2:5002/api/v1/Account/authenticateByEmail"
+        val url = "${Constants.BASE_URL}/Account/authenticateByEmail"
         val datos = JSONObject()
         datos.put("email", email.value)
         datos.put("password", password.value)
@@ -44,18 +45,22 @@ class LoginViewModel : ViewModel() {
             Request.Method.POST, url, datos,
             { s->
                 try {
-                    val obj = (s)
+                    val obj = JSONObject(s.toString())
                     if(obj.getBoolean("succeeded")) {
-                        var array=obj.getJSONArray("data")
-                        var data = array.getJSONObject(0)
-                        message.value = obj.getString("message")
-
+                        message.value = "Autentificación exitosa"
+                        val data = obj.getJSONObject("data")
+                        val sharedPref = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
+                        val editor = sharedPref.edit()
+                        editor.putString("user_data", data.toString())
+                        editor.apply()
                     }else {
                         message.value = obj.getString("message")
+
                     }
 
                 }catch (e: JSONException) {
                     message.value = e.message
+
                 }
             }, {volleyError-> message.value = volleyError.message})
         rq.add(js)

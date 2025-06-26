@@ -13,14 +13,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.uniandes.ciemi.R
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    navController: NavHostController,
+    viewModel: LoginViewModel,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -29,6 +30,11 @@ fun LoginScreen(
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
+            if (it.contains("Autentificación exitosa", true)) {
+                navController.navigate("dashboard") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
         }
     }
     Column(
@@ -80,10 +86,4 @@ fun LogoImage() {
         modifier = Modifier.size(120.dp),
         contentScale = ContentScale.Fit
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    LoginScreen()
 }
