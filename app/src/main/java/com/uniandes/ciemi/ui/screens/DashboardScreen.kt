@@ -24,7 +24,10 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
     val topBarTitle = when (currentSection) {
         DashboardSection.HOME     -> "Inicio"
         DashboardSection.USERS    -> "Usuarios"
+        DashboardSection.CATEGORY -> "Categorías"
+        DashboardSection.SELLER   -> "Vendedores"
         DashboardSection.CLIENT   -> "Clientes"
+        DashboardSection.BUSINESS -> "Negocios"
         DashboardSection.SETTINGS -> "Configuración"
     }
     ModalNavigationDrawer(
@@ -46,15 +49,32 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                         selected = currentSection == DashboardSection.HOME,
                         onClick = { viewModel.currentSection.value = DashboardSection.HOME }
                     )
+                    if (role == "Admin") {
+                        NavigationDrawerItem(
+                            label = { Text("Gestión de usuarios") },
+                            selected = currentSection == DashboardSection.USERS,
+                            onClick = { viewModel.currentSection.value = DashboardSection.USERS }
+                        )
+                    }
                     NavigationDrawerItem(
-                        label = { Text("Gestión de usuarios") },
-                        selected = currentSection == DashboardSection.USERS,
-                        onClick = { viewModel.currentSection.value = DashboardSection.USERS }
+                        label = { Text("Gestión de categorías") },
+                        selected = currentSection == DashboardSection.CATEGORY,
+                        onClick = { viewModel.currentSection.value = DashboardSection.CATEGORY }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Gestión de vendedores") },
+                        selected = currentSection == DashboardSection.SELLER,
+                        onClick = { viewModel.currentSection.value = DashboardSection.SELLER }
                     )
                     NavigationDrawerItem(
                         label = { Text("Gestión de clientes") },
                         selected = currentSection == DashboardSection.CLIENT,
                         onClick = { viewModel.currentSection.value = DashboardSection.CLIENT }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Gestión de negocios") },
+                        selected = currentSection == DashboardSection.BUSINESS,
+                        onClick = { viewModel.currentSection.value = DashboardSection.BUSINESS }
                     )
                     NavigationDrawerItem(
                         label = { Text("Configuración") },
@@ -89,7 +109,10 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                 when (currentSection) {
                     DashboardSection.HOME -> Text("Esta es la pantalla de inicio.")
                     DashboardSection.USERS -> UserScreen()
+                    DashboardSection.CATEGORY -> CategoryScreen()
+                    DashboardSection.SELLER -> SellerScreen()
                     DashboardSection.CLIENT -> ClientScreen()
+                    DashboardSection.BUSINESS -> BusinessScreen()
                     DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
                 }
             }
