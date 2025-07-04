@@ -64,7 +64,7 @@ class ClientViewModel : ViewModel() {
         val url = "${Constants.BASE_URL}/Cliente/listar?" +
                 "Identificacion=${identificacionBusqueda}&" +
                 "PrimerApellido=${primerApellidoBusqueda}&" +
-                "NegocioId=67&pageNumber=${pageNumber}&pageSize=${pageSize}"
+                "NegocioId=3&pageNumber=${pageNumber}&pageSize=${pageSize}"
 
         val rq = Volley.newRequestQueue(context)
 

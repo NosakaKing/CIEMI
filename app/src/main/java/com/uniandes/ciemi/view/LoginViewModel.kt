@@ -60,9 +60,13 @@ class LoginViewModel : ViewModel() {
 
                 }catch (e: JSONException) {
                     message.value = e.message
+                    println(e.message)
 
                 }
-            }, {volleyError-> message.value = volleyError.message})
+            }, {volleyError->
+                message.value = volleyError.message
+                println(volleyError.message)
+            })
         rq.add(js)
     }
 

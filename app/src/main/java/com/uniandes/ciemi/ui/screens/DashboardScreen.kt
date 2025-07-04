@@ -23,6 +23,8 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
     val currentSection = viewModel.currentSection.value
     val topBarTitle = when (currentSection) {
         DashboardSection.HOME     -> "Inicio"
+        DashboardSection.PRODUCTS -> "Productos"
+        DashboardSection.CATEGORIES -> "Categorias"
         DashboardSection.USERS    -> "Usuarios"
         DashboardSection.CLIENT   -> "Clientes"
         DashboardSection.SETTINGS -> "Configuración"
@@ -45,6 +47,16 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                         label = { Text("Inicio") },
                         selected = currentSection == DashboardSection.HOME,
                         onClick = { viewModel.currentSection.value = DashboardSection.HOME }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Productos") },
+                        selected = currentSection == DashboardSection.PRODUCTS,
+                        onClick = { viewModel.currentSection.value = DashboardSection.PRODUCTS }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Categorias") },
+                        selected = currentSection == DashboardSection.CATEGORIES,
+                        onClick = { viewModel.currentSection.value = DashboardSection.CATEGORIES }
                     )
                     NavigationDrawerItem(
                         label = { Text("Gestión de usuarios") },
@@ -89,6 +101,8 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                 when (currentSection) {
                     DashboardSection.HOME -> Text("Esta es la pantalla de inicio.")
                     DashboardSection.USERS -> UserScreen()
+                    DashboardSection.PRODUCTS -> ProductScreen()
+                    DashboardSection.CATEGORIES -> CategoryScreen()
                     DashboardSection.CLIENT -> ClientScreen()
                     DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
                 }
