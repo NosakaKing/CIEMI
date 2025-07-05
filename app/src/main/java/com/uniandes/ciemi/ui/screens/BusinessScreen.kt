@@ -23,6 +23,7 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
 
     LaunchedEffect(true) {
         viewModel.loadBusiness(context)
+        viewModel.loadCategories(context)
     }
 
     LaunchedEffect(message) {
@@ -159,6 +160,37 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                             }
                         }
                     }
+                    var expandedCategoria by remember { mutableStateOf(false) }
+
+                    ExposedDropdownMenuBox(
+                        expanded = expandedCategoria,
+                        onExpandedChange = { expandedCategoria = !expandedCategoria }
+                    ) {
+                        val selectedCategoria = viewModel.categorias.find { it.id == viewModel.categoriaSeleccionadaId.value }
+                        OutlinedTextField(
+                            readOnly = true,
+                            value = selectedCategoria?.nombre ?: "Seleccione una categoría",
+                            onValueChange = {},
+                            label = { Text("Categoría") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedCategoria) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedCategoria,
+                            onDismissRequest = { expandedCategoria = false }
+                        ) {
+                            viewModel.categorias.forEach { categoria ->
+                                DropdownMenuItem(
+                                    text = { Text(categoria.nombre) },
+                                    onClick = {
+                                        viewModel.categoriaSeleccionadaId.value = categoria.id
+                                        expandedCategoria = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     OutlinedTextField(
                         value = viewModel.descripcion.value,
                         onValueChange = { viewModel.descripcion.value = it },

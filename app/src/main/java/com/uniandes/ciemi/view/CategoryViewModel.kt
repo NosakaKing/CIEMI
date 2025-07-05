@@ -1,7 +1,6 @@
 package com.uniandes.ciemi.view
 
 import android.content.Context
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -18,7 +17,6 @@ class CategoryViewModel : ViewModel() {
     val categories = mutableStateListOf<Category>()
     var nombre = mutableStateOf("")
     var descripcion = mutableStateOf("")
-    var tipo = mutableStateOf("")
     var message = mutableStateOf<String?>(null)
 
 
@@ -66,7 +64,7 @@ class CategoryViewModel : ViewModel() {
         val datos = JSONObject().apply {
             put("nombre", nombre.value)
             put("descripcion", descripcion.value)
-            put("tipo", tipo.value)
+            put("tipo", "PRODUCTO")
             put("negocioId", 67)
         }
 
@@ -108,6 +106,5 @@ class CategoryViewModel : ViewModel() {
     fun clearFields() {
         nombre.value = ""
         descripcion.value = ""
-        tipo.value = ""
     }
 }

@@ -63,8 +63,6 @@ fun CategoryScreen(viewModel: CategoryViewModel = viewModel()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Nombre: ${category.nombre}")
                         Text("Descripción: ${category.descripcion}")
-                        Text("Tipo: ${category.tipo}")
-                        Text("Negocio ID: ${category.negocioId}")
                     }
                 }
             }
@@ -87,12 +85,6 @@ fun CategoryScreen(viewModel: CategoryViewModel = viewModel()) {
                         value = viewModel.descripcion.value,
                         onValueChange = { viewModel.descripcion.value = it },
                         label = { Text("Descripción") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    OutlinedTextField(
-                        value = viewModel.tipo.value,
-                        onValueChange = { viewModel.tipo.value = it },
-                        label = { Text("Tipo") },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
