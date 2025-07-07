@@ -2,35 +2,48 @@ package com.uniandes.ciemi.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.uniandes.ciemi.view.DashboardSection
-import com.uniandes.ciemi.view.DashboardViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.uniandes.ciemi.view.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(viewModel: DashboardViewModel) {
+fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
+businessSelectViewModel: BusinessSelectViewModel = viewModel()
+) {
     val context = LocalContext.current
 
-    LaunchedEffect (Unit) {
-        viewModel.loadUserData(context)
-    }
     val userName = viewModel.userName.value
     val role = viewModel.role.value
     val currentSection = viewModel.currentSection.value
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserData(context)
+        viewModel.loadNegocios(context)
+    }
+
+    val negocioSeleccionado = viewModel.negocioSeleccionado.value
+    LaunchedEffect(negocioSeleccionado) {
+        if (negocioSeleccionado != null) {
+            businessSelectViewModel.setNegocio(negocioSeleccionado)
+        }
+    }
+
+
     val topBarTitle = when (currentSection) {
-        DashboardSection.HOME     -> "Inicio"
-        DashboardSection.USERS    -> "Usuarios"
+        DashboardSection.HOME -> "Inicio"
+        DashboardSection.USERS -> "Usuarios"
         DashboardSection.CATEGORY -> "Categorías"
-        DashboardSection.SELLER   -> "Vendedores"
-        DashboardSection.CLIENT   -> "Clientes"
-        DashboardSection.PRODUCT  -> "Productos"
+        DashboardSection.SELLER -> "Vendedores"
+        DashboardSection.CLIENT -> "Clientes"
+        DashboardSection.PRODUCT -> "Productos"
         DashboardSection.BUSINESS -> "Negocios"
         DashboardSection.SETTINGS -> "Configuración"
     }
+
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet {
@@ -40,11 +53,8 @@ fun DashboardScreen(viewModel: DashboardViewModel) {
                         .padding(vertical = 16.dp),
                     verticalArrangement = Arrangement.Top
                 ) {
-                    Text(
-                        text = "CIEMI",
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
+                    NegocioDropdown(viewModel)
+
                     NavigationDrawerItem(
                         label = { Text("Inicio") },
                         selected = currentSection == DashboardSection.HOME,

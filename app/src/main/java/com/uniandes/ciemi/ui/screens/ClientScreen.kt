@@ -10,10 +10,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.uniandes.ciemi.view.BusinessSelectViewModel
 import com.uniandes.ciemi.view.ClientViewModel
 
 @Composable
-fun ClientScreen(viewModel: ClientViewModel = viewModel()) {
+fun ClientScreen(
+    viewModel: ClientViewModel = viewModel(),
+    businessViewModel: BusinessSelectViewModel = viewModel()
+) {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
     var filtroIdentificacion by remember { mutableStateOf("") }
@@ -21,8 +25,11 @@ fun ClientScreen(viewModel: ClientViewModel = viewModel()) {
     val clients = viewModel.clients
     val message by viewModel.message
 
-    LaunchedEffect(true) {
-        viewModel.loadClients(context)
+    LaunchedEffect(businessViewModel.negocioSeleccionado.value) {
+        val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
+        if (negocioSeleccionado != null) {
+            viewModel.loadClients(context, negocioSeleccionado.id)
+        }
     }
 
     LaunchedEffect(message) {
@@ -33,6 +40,7 @@ fun ClientScreen(viewModel: ClientViewModel = viewModel()) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+
         Text(text = "Lista de Clientes", style = MaterialTheme.typography.titleMedium)
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -72,11 +80,21 @@ fun ClientScreen(viewModel: ClientViewModel = viewModel()) {
 
                 Button(
                     onClick = {
-                        viewModel.loadClients(
-                            context,
-                            identificacionBusqueda = filtroIdentificacion,
-                            primerApellidoBusqueda = filtroPrimerApellido
-                        )
+                        val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
+                        if (negocioSeleccionado != null) {
+                            viewModel.loadClients(
+                                context,
+                                negocioId = negocioSeleccionado.id,
+                                identificacionBusqueda = filtroIdentificacion,
+                                primerApellidoBusqueda = filtroPrimerApellido
+                            )
+                        } else {
+                            Toast.makeText(
+                                context,
+                                "Seleccione un negocio primero",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -96,7 +114,7 @@ fun ClientScreen(viewModel: ClientViewModel = viewModel()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("Nombre: ${client.nombres} ${client.primerApellido} ${client.segundoApellido}")
                         Text("Email: ${client.email}")
-                        Text("Identificacióm: ${client.identificacion}")
+                        Text("Identificación: ${client.identificacion}")
                         Text("Ciudad: ${client.ciudad}")
                         Text("Dirección: ${client.direccion}")
                         Spacer(modifier = Modifier.height(8.dp))
@@ -172,13 +190,23 @@ fun ClientScreen(viewModel: ClientViewModel = viewModel()) {
             },
             confirmButton = {
                 Button(onClick = {
-                    val esActualizar = viewModel.clienteId.value != 0
-                    viewModel.saveOrUpdateClient(
-                        context,
-                        esActualizar = esActualizar,
-                        clienteId = viewModel.clienteId.value
-                    )
-                    showDialog = false
+                    val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
+                    if (negocioSeleccionado != null) {
+                        val esActualizar = viewModel.clienteId.value != 0
+                        viewModel.saveOrUpdateClient(
+                            context,
+                            esActualizar = esActualizar,
+                            negocioId = negocioSeleccionado.id,
+                            clienteId = viewModel.clienteId.value
+                        )
+                        showDialog = false
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Seleccione un negocio primero",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }) {
                     Text(if (viewModel.clienteId.value == 0) "Guardar Cliente" else "Actualizar Cliente")
                 }

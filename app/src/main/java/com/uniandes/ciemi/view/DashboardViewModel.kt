@@ -1,23 +1,48 @@
 package com.uniandes.ciemi.view
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import org.json.JSONObject
+import com.uniandes.ciemi.data.repository.BusinessRepository
+import com.uniandes.ciemi.model.SelectBusiness
+import com.uniandes.ciemi.utils.Constants
 
 class DashboardViewModel : ViewModel() {
+
     var userName = mutableStateOf("")
     var role = mutableStateOf("")
     val currentSection = mutableStateOf(DashboardSection.HOME)
+    val negocios = mutableStateListOf<SelectBusiness>()
+    val negocioSeleccionado = mutableStateOf<SelectBusiness?>(null)
 
     fun loadUserData(context: Context) {
-        val sharedPref = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
-        val userDataString = sharedPref.getString("user_data", null)
+        userName.value = Constants.getUserName(context)
+        role.value = Constants.getUserRole(context)
+    }
 
-        if (userDataString != null) {
-            val userData = JSONObject(userDataString)
-            userName.value = userData.optString("userName", "Usuario")
-            role.value = userData.optJSONArray("roles")?.optString(0) ?: "Sin rol"
-        }
+    fun loadNegocios(context: Context) {
+        BusinessRepository.loadBusiness(
+            context = context,
+            onSuccess = { lista ->
+                negocios.clear()
+                negocios.addAll(lista)
+
+                if (role.value.contains("Vendedor", ignoreCase = true) && lista.isNotEmpty()) {
+                    negocioSeleccionado.value = lista[0]
+                }
+
+                if (!role.value.contains("Vendedor", ignoreCase = true) && lista.isNotEmpty() && negocioSeleccionado.value == null) {
+                    negocioSeleccionado.value = lista[0]
+                }
+            },
+            onError = {
+                println("Error cargando negocios: $it")
+            }
+        )
+    }
+
+    fun setNegocio(negocio: SelectBusiness) {
+        negocioSeleccionado.value = negocio
     }
 }

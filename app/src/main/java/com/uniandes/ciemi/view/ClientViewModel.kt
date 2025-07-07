@@ -43,15 +43,17 @@ class ClientViewModel : ViewModel() {
 
     fun loadClients(
         context: Context,
+        negocioId: Int,
         identificacionBusqueda: String = "",
         primerApellidoBusqueda: String = "",
         pageNumber: Int = 1,
-        pageSize: Int = 10
+        pageSize: Int = 10,
+
     ) {
         val url = "${Constants.BASE_URL}/Cliente/listar?" +
                 "Identificacion=${identificacionBusqueda}&" +
                 "PrimerApellido=${primerApellidoBusqueda}&" +
-                "NegocioId=67&pageNumber=${pageNumber}&pageSize=${pageSize}"
+                "NegocioId=${negocioId}&pageNumber=${pageNumber}&pageSize=${pageSize}"
 
         val rq = Volley.newRequestQueue(context)
 
@@ -93,7 +95,7 @@ class ClientViewModel : ViewModel() {
     }
 
 
-    fun saveOrUpdateClient(context: Context, esActualizar: Boolean, clienteId: Int = 0) {
+    fun saveOrUpdateClient(context: Context, esActualizar: Boolean, clienteId: Int = 0, negocioId: Int,) {
         val url = if (esActualizar) {
             "${Constants.BASE_URL}/Cliente/actualizar"
         } else {
@@ -110,7 +112,7 @@ class ClientViewModel : ViewModel() {
             put("telefono", telefono.value)
             put("ciudad", ciudad.value)
             put("direccion", direccion.value)
-            put("negocioId", 67)
+            put("negocioId", negocioId)
         }
 
         val metodoHttp = if (esActualizar) Request.Method.PUT else Request.Method.POST
@@ -122,7 +124,6 @@ class ClientViewModel : ViewModel() {
                 try {
                     if (response.getBoolean("succeeded")) {
                         message.value = if (esActualizar) "Cliente actualizado exitosamente" else "Cliente agregado exitosamente"
-                        loadClients(context)
                         clearFields()
                     } else {
                         message.value = response.getString("message")
