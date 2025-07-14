@@ -4,6 +4,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.uniandes.ciemi.view.DashboardViewModel
 
@@ -17,7 +18,9 @@ fun NegocioDropdown(viewModel: DashboardViewModel) {
         Text("No hay negocios disponibles", modifier = Modifier.padding(16.dp))
     } else {
         Box(modifier = Modifier.padding(16.dp)) {
-            Button(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0054A3)
+            )) {
                 Text(negocioSeleccionado?.nombre ?: "Seleccionar negocio")
             }
 
@@ -28,7 +31,7 @@ fun NegocioDropdown(viewModel: DashboardViewModel) {
                         onClick = {
                             viewModel.setNegocio(negocio)
                             expanded = false
-                        }
+                        },
                     )
                 }
             }

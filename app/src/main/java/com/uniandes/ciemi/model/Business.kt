@@ -9,5 +9,5 @@ data class Business(
     val telefono: String,
     val estado: String,
     val descripcion: String,
-    val categoriaId: Int
+    val categoriaId: Int,
 )

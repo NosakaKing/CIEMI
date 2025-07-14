@@ -11,27 +11,45 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.uniandes.ciemi.view.BusinessSelectViewModel
 import com.uniandes.ciemi.view.SellerViewModel
 
 @Composable
-fun SellerScreen(viewModel: SellerViewModel = viewModel()) {
+fun SellerScreen(viewModel: SellerViewModel = viewModel(),
+                 businessViewModel: BusinessSelectViewModel = viewModel()) {
     val context = LocalContext.current
+    val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
+
+    if (negocioSeleccionado == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Seleccione un negocio para ver los clientes")
+        }
+        return
+    }
     var showDialog by remember { mutableStateOf(false) }
     val sellers = viewModel.sellers
     val message by viewModel.message
 
-    LaunchedEffect(true) {
-        viewModel.loadSeller(context)
+    LaunchedEffect(negocioSeleccionado) {
+        viewModel.loadSeller(context, negocioSeleccionado.id)
     }
 
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(viewModel.sellerGuardado.value) {
+        if (viewModel.sellerGuardado.value) {
+            viewModel.loadSeller(context, negocioSeleccionado.id)
+            viewModel.resetSellerGuardado()
         }
     }
 
@@ -132,7 +150,7 @@ fun SellerScreen(viewModel: SellerViewModel = viewModel()) {
             },
             confirmButton = {
                 Button(onClick = {
-                    viewModel.saveSeller(context)
+                    viewModel.saveSeller(context, negocioSeleccionado.id)
                     showDialog = false
                 }) {
                     Text("Guardar Vendedor")

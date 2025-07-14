@@ -7,28 +7,48 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.uniandes.ciemi.view.BusinessSelectViewModel
 import com.uniandes.ciemi.view.CategoryViewModel
 
 @Composable
-fun CategoryScreen(viewModel: CategoryViewModel = viewModel()) {
+fun CategoryScreen(viewModel: CategoryViewModel = viewModel(),
+        businessViewModel: BusinessSelectViewModel = viewModel()
+) {
     val context = LocalContext.current
+    val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
+
+    if (negocioSeleccionado == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Seleccione un negocio para ver los clientes")
+        }
+        return
+    }
     var showDialog by remember { mutableStateOf(false) }
     val categories = viewModel.categories
     val message by viewModel.message
 
-    LaunchedEffect(true) {
-        viewModel.loadCategories(context)
+    LaunchedEffect(negocioSeleccionado) {
+        viewModel.loadCategories(context, negocioSeleccionado.id)
     }
 
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(viewModel.categoriaGuardada.value) {
+        if (viewModel.categoriaGuardada.value) {
+            viewModel.loadCategories(context, negocioSeleccionado.id)
+            viewModel.resetCategoriaGuardada()
         }
     }
 
@@ -45,7 +65,10 @@ fun CategoryScreen(viewModel: CategoryViewModel = viewModel()) {
                 viewModel.clearFields()
                 showDialog = true
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0054A3)
+            )
         ) {
             Text("Agregar Categoría")
         }
@@ -91,9 +114,13 @@ fun CategoryScreen(viewModel: CategoryViewModel = viewModel()) {
             },
             confirmButton = {
                 Button(onClick = {
-                    viewModel.saveCategory(context)
+                    viewModel.saveCategory(context, negocioId = negocioSeleccionado.id)
                     showDialog = false
-                }) {
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0054A3)
+                    )
+                    ) {
                     Text("Guardar Categoría")
                 }
             },

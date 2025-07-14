@@ -6,7 +6,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -19,23 +21,35 @@ fun ClientScreen(
     businessViewModel: BusinessSelectViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
+
+    if (negocioSeleccionado == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Seleccione un negocio para ver los clientes")
+        }
+        return
+    }
     var showDialog by remember { mutableStateOf(false) }
     var filtroIdentificacion by remember { mutableStateOf("") }
     var filtroPrimerApellido by remember { mutableStateOf("") }
     val clients = viewModel.clients
     val message by viewModel.message
 
-    LaunchedEffect(businessViewModel.negocioSeleccionado.value) {
-        val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
-        if (negocioSeleccionado != null) {
-            viewModel.loadClients(context, negocioSeleccionado.id)
-        }
+    LaunchedEffect(negocioSeleccionado) {
+        viewModel.loadClients(context, negocioSeleccionado.id)
     }
 
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
+        }
+    }
+
+    LaunchedEffect(viewModel.clienteGuardado.value) {
+        if (viewModel.clienteGuardado.value) {
+            viewModel.loadClients(context, negocioSeleccionado.id)
+            viewModel.resetClienteGuardado()
         }
     }
 
@@ -50,7 +64,10 @@ fun ClientScreen(
                 viewModel.clienteId.value = 0
                 showDialog = true
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0054A3)
+            )
         ) {
             Text("Agregar Cliente")
         }
@@ -80,23 +97,17 @@ fun ClientScreen(
 
                 Button(
                     onClick = {
-                        val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
-                        if (negocioSeleccionado != null) {
-                            viewModel.loadClients(
-                                context,
-                                negocioId = negocioSeleccionado.id,
-                                identificacionBusqueda = filtroIdentificacion,
-                                primerApellidoBusqueda = filtroPrimerApellido
-                            )
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Seleccione un negocio primero",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        viewModel.loadClients(
+                            context,
+                            negocioId = negocioSeleccionado.id,
+                            identificacionBusqueda = filtroIdentificacion,
+                            primerApellidoBusqueda = filtroPrimerApellido
+                        )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0054A3)
+                    )
                 ) {
                     Text("Buscar")
                 }
@@ -108,7 +119,9 @@ fun ClientScreen(
         LazyColumn {
             items(clients) { client ->
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
@@ -190,24 +203,18 @@ fun ClientScreen(
             },
             confirmButton = {
                 Button(onClick = {
-                    val negocioSeleccionado = businessViewModel.negocioSeleccionado.value
-                    if (negocioSeleccionado != null) {
-                        val esActualizar = viewModel.clienteId.value != 0
-                        viewModel.saveOrUpdateClient(
-                            context,
-                            esActualizar = esActualizar,
-                            negocioId = negocioSeleccionado.id,
-                            clienteId = viewModel.clienteId.value
-                        )
-                        showDialog = false
-                    } else {
-                        Toast.makeText(
-                            context,
-                            "Seleccione un negocio primero",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }) {
+                    val esActualizar = viewModel.clienteId.value != 0
+                    viewModel.saveOrUpdateClient(
+                        context,
+                        esActualizar = esActualizar,
+                        negocioId = negocioSeleccionado.id,
+                        clienteId = viewModel.clienteId.value
+                    )
+                    showDialog = false
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0054A3)
+                    )) {
                     Text(if (viewModel.clienteId.value == 0) "Guardar Cliente" else "Actualizar Cliente")
                 }
             },

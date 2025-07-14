@@ -1,17 +1,22 @@
 package com.uniandes.ciemi.view
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
+import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.uniandes.ciemi.data.repository.CategoryRepository
+import com.uniandes.ciemi.data.repository.EntrepreneurRepository
 import com.uniandes.ciemi.model.Business
 import com.uniandes.ciemi.model.Category
-import com.uniandes.ciemi.model.Client
+import com.uniandes.ciemi.model.Entrepreneur
 import com.uniandes.ciemi.utils.Constants
 import org.json.JSONException
 import org.json.JSONObject
@@ -20,16 +25,21 @@ class BusinessViewModel : ViewModel() {
 
     val business = mutableStateListOf<Business>()
     val categorias = mutableStateListOf<Category>()
+    val emprendedores = mutableStateListOf<Entrepreneur>()
     var businessId = mutableIntStateOf(0)
+    var role = mutableStateOf("")
     var nombre = mutableStateOf("")
     var categoriaSeleccionadaId = mutableIntStateOf(0)
+    var empresaSeleccionadaId = mutableStateOf("")
     var direccion = mutableStateOf("")
     var telefono = mutableStateOf("")
     var estado = mutableStateOf("")
     var descripcion = mutableStateOf("")
     var message = mutableStateOf<String?>(null)
 
-
+    fun loadUserData(context: Context) {
+        role.value = Constants.getUserRole(context)
+    }
 
     fun setBusinessEdit(business: Business) {
         businessId.value = business.id
@@ -46,7 +56,14 @@ class BusinessViewModel : ViewModel() {
         search: String = "",
     ) {
         val emprendedorId = Constants.getUserId(context)
-        val url = "${Constants.BASE_URL}/Negocio/listar?EmprendedorId=$emprendedorId&Nombre=$search"
+        val isAdmin = Constants.getUserRole(context) == "Admin"
+        val baseUrl = "${Constants.BASE_URL}/Negocio/listar"
+
+        val url = if (isAdmin) {
+            "$baseUrl?Nombre=$search"
+        } else {
+            "$baseUrl?EmprendedorId=$emprendedorId&Nombre=$search"
+        }
         val rq = Volley.newRequestQueue(context)
 
         val js = object : JsonObjectRequest(Method.GET, url, null,
@@ -84,10 +101,10 @@ class BusinessViewModel : ViewModel() {
         rq.add(js)
     }
 
-    fun loadCategories(context: Context, negocioId: Int = 67) {
+    fun loadCategories(context: Context) {
         CategoryRepository.loadCategories(
             context = context,
-            negocioId = negocioId,
+            negocioId = 0,
             tipo = "NEGOCIO",
             onSuccess = {
                 categorias.clear()
@@ -95,6 +112,22 @@ class BusinessViewModel : ViewModel() {
             },
             onError = {
                 println("Error al cargar categorías: $it")
+            }
+        )
+    }
+
+    fun loadEntrepreneur(context: Context) {
+        EntrepreneurRepository.loadEntrepreneur(
+            context = context,
+            onSuccess = {
+                emprendedores.clear()
+                emprendedores.addAll(it)
+                Log.d("Emprendedores", emprendedores.toString())
+
+            },
+            onError = {
+                println("Error al cargar: $it")
+                Log.e("EntrepreneurError", it)
             }
         )
     }
@@ -115,6 +148,9 @@ class BusinessViewModel : ViewModel() {
             put("direccion", direccion.value)
             put("telefono", telefono.value)
             put("estado", estado.value.uppercase())
+            if(role.value == "Admin") {
+                put("emprendedorId", empresaSeleccionadaId.value)
+            }
             put("descripcion", descripcion.value)
         }
 
@@ -125,52 +161,74 @@ class BusinessViewModel : ViewModel() {
             metodoHttp, url, datos,
             { response ->
                 try {
-                    if (response.getBoolean("succeeded")) {
-                        message.value = if (esActualizar) "Negocio actualizado exitosamente" else "Negocio agregado exitosamente"
+                    val obj = JSONObject(response.toString())
+                    if(obj.getBoolean("succeeded")) {
+                        message.value = obj.optString("message")
                         loadBusiness(context)
                         clearFields()
                     } else {
-                        message.value = response.getString("message")
+                        message.value = obj.getString("message")
                     }
                 } catch (e: JSONException) {
                     message.value = e.message
                 }
             },
             { error ->
-                val responseData = error.networkResponse?.data
-                if (responseData != null) {
-                    try {
-                        val jsonString = String(responseData, Charsets.UTF_8)
+                try {
+                    val statusCode = error.networkResponse?.statusCode
+                    val responseBody = error.networkResponse?.data?.let { String(it) }
 
-                        val json = JSONObject(jsonString)
-
-                        val succeeded = json.optBoolean("Succeeded", false)
-                        val dataId = json.optInt("Data", 0)
-
-                        if (succeeded && dataId != 0) {
-                            message.value = if (esActualizar) "Negocio actualizado exitosamente" else "Negocio agregado exitosamente"
-                            loadBusiness(context)
-                            clearFields()
-                        } else {
-                            message.value = if (esActualizar) "Negocio actualizado exitosamente" else "Negocio agregado exitosamente"
-                            loadBusiness(context)
-                        }
-                    } catch (ex: Exception) {
-                        message.value = "Error al interpretar respuesta del servidor: ${ex.message}"
+                    if (responseBody != null) {
+                        val errorJson = JSONObject(responseBody)
+                        val errorMessage = errorJson.optString("Message", "Error desconocido")
+                        message.value = "[$statusCode] $errorMessage"
+                    } else {
+                        message.value = "[$statusCode] Error sin cuerpo de respuesta"
                     }
-                } else {
-                    message.value = error.message ?: "Error desconocido"
+                } catch (e: Exception) {
+                    message.value = "Error al leer la respuesta de error: ${e.message}"
                 }
             }
-        ) {
+        )
+        {
             override fun getHeaders(): MutableMap<String, String> {
                 return Constants.getAuthHeaders(context)
             }
         }
 
+        js.retryPolicy = com.android.volley.DefaultRetryPolicy(
+            150000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+
         rq.add(js)
     }
 
+
+    fun aproveeBusiness(context: Context, businessId: Int, aprobado: Boolean) {
+        val url = "${Constants.BASE_URL}/Negocio/aprobar?negocioId=$businessId&aprobado=$aprobado"
+        val rq = Volley.newRequestQueue(context)
+
+        val stringRequest = object : StringRequest(
+            Method.GET, url,
+            Response.Listener { response ->
+               message.value = response
+                loadBusiness(context)
+            },
+            Response.ErrorListener { error ->
+                message.value = error.message
+            }
+        ) {}
+
+        stringRequest.retryPolicy = com.android.volley.DefaultRetryPolicy(
+            150000,
+            DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+            DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
+        )
+
+        rq.add(stringRequest)
+    }
 
 
     fun clearMessage() {

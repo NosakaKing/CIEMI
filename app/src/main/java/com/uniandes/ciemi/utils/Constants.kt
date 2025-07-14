@@ -43,22 +43,10 @@ object Constants {
         return getUserData(context).getString("userName")
     }
 
-    fun getNegocios(context: Context): List<SelectBusiness> {
-        val negociosList = mutableListOf<SelectBusiness>()
-        val userData = getUserData(context)
-        val negociosArray = userData.getJSONArray("negocios")
-
-        for (i in 0 until negociosArray.length()) {
-            val obj = negociosArray.getJSONObject(i)
-            negociosList.add(
-                SelectBusiness(
-                    id = obj.getInt("id"),
-                    nombre = obj.getString("nombre"),
-                    estado = obj.getString("estado")
-                )
-            )
-        }
-        return negociosList
+    fun logout(context: Context) {
+        val sharedPref = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
+        sharedPref.edit().clear().apply()
     }
+
 
 }

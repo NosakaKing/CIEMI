@@ -4,16 +4,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.uniandes.ciemi.utils.Constants
 import com.uniandes.ciemi.view.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
-businessSelectViewModel: BusinessSelectViewModel = viewModel()
-) {
+                    businessSelectViewModel: BusinessSelectViewModel = viewModel(),
+                    navController: NavHostController
+                    ,
+
+                    ) {
     val context = LocalContext.current
 
     val userName = viewModel.userName.value
@@ -40,6 +47,7 @@ businessSelectViewModel: BusinessSelectViewModel = viewModel()
         DashboardSection.SELLER -> "Vendedores"
         DashboardSection.CLIENT -> "Clientes"
         DashboardSection.PRODUCT -> "Productos"
+        DashboardSection.STOCK -> "Stock"
         DashboardSection.BUSINESS -> "Negocios"
         DashboardSection.SETTINGS -> "Configuración"
     }
@@ -78,6 +86,11 @@ businessSelectViewModel: BusinessSelectViewModel = viewModel()
                         onClick = { viewModel.currentSection.value = DashboardSection.PRODUCT }
                     )
                     NavigationDrawerItem(
+                        label = { Text("Gestión de stock") },
+                        selected = currentSection == DashboardSection.STOCK,
+                        onClick = { viewModel.currentSection.value = DashboardSection.STOCK }
+                    )
+                    NavigationDrawerItem(
                         label = { Text("Gestión de vendedores") },
                         selected = currentSection == DashboardSection.SELLER,
                         onClick = { viewModel.currentSection.value = DashboardSection.SELLER }
@@ -108,6 +121,24 @@ businessSelectViewModel: BusinessSelectViewModel = viewModel()
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.titleSmall
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Button(
+                        onClick = {
+                            Constants.logout(context)
+                            navController.navigate("login") {
+                                popUpTo(0)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0054A3)
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text("Cerrar sesión")
+                    }
                 }
             }
         }
@@ -129,6 +160,7 @@ businessSelectViewModel: BusinessSelectViewModel = viewModel()
                     DashboardSection.SELLER -> SellerScreen()
                     DashboardSection.CLIENT -> ClientScreen()
                     DashboardSection.PRODUCT -> ProductScreen()
+                    DashboardSection.STOCK -> StockScreen()
                     DashboardSection.BUSINESS -> BusinessScreen()
                     DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
                 }

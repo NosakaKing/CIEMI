@@ -10,14 +10,12 @@ object CategoryRepository {
 
     fun loadCategories(
         context: Context,
-        pageNumber: Int = 1,
-        pageSize: Int = 10,
         negocioId: Int,
         tipo: String,
         onSuccess: (List<Category>) -> Unit,
         onError: (String) -> Unit
     ) {
-        val url = "${Constants.BASE_URL}/Categoria/select-categorias?Tipo=$tipo&NegocioId=$negocioId&pageNumber=$pageNumber&pageSize=$pageSize"
+        val url = "${Constants.BASE_URL}/Categoria/select-categorias?tipo=$tipo&negocioId=$negocioId"
 
         val rq = Volley.newRequestQueue(context)
 
@@ -27,21 +25,18 @@ object CategoryRepository {
                 for (i in 0 until response.length()) {
                     val obj = response.getJSONObject(i)
                     categories.add(
-                            Category(
-                                id = obj.getInt("id"),
-                                nombre = obj.getString("nombre"),
-                            )
+                        Category(
+                            id = obj.getInt("id"),
+                            nombre = obj.getString("nombre"),
                         )
-                    }
-                    onSuccess(categories)
+                    )
+                }
+                onSuccess(categories)
             },
             { error ->
                 onError(error.message ?: "Unknown error")
             }
         ) {
-            override fun getHeaders(): MutableMap<String, String> {
-                return Constants.getAuthHeaders(context)
-            }
         }
 
         rq.add(js)

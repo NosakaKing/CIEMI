@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -71,10 +72,30 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = { viewModel.login(context)},
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0054A3)
+            )
+
         ) {
             Text(text = "Ingresar")
         }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(
+            onClick = { navController.navigate("register") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "Registrarse")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(
+            onClick = { navController.navigate("reset") },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        ) {
+            Text(text = "¿Olvidaste tu contraseña?")
+        }
+
     }
 }
 

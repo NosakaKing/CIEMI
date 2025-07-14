@@ -15,6 +15,7 @@ import org.json.JSONObject
 class SellerViewModel : ViewModel() {
 
     val sellers = mutableStateListOf<Seller>()
+    var sellerGuardado = mutableStateOf(false)
     var identificacion = mutableStateOf("")
     var nombre = mutableStateOf("")
     var apellido = mutableStateOf("")
@@ -28,8 +29,9 @@ class SellerViewModel : ViewModel() {
 
     fun loadSeller(
         context: Context,
+        negocioId: Int,
     ) {
-        val url = "${Constants.BASE_URL}/Account/listarVendedores?Identificacion=&Email=&NegocioId=67&pageNumber=1&pageSize=10"
+        val url = "${Constants.BASE_URL}/Account/listarVendedores?Identificacion=&Email=&NegocioId=${negocioId}&pageNumber=1&pageSize=10"
         val rq = Volley.newRequestQueue(context)
         val js = object : JsonObjectRequest(
             Method.GET, url, null,
@@ -67,7 +69,7 @@ class SellerViewModel : ViewModel() {
         rq.add(js)
     }
 
-    fun saveSeller(context: Context) {
+    fun saveSeller(context: Context,  negocioId: Int,) {
         val url = "${Constants.BASE_URL}/Account/registerSeller"
         val datos = JSONObject().apply {
             put("identificacion", identificacion.value)
@@ -79,7 +81,7 @@ class SellerViewModel : ViewModel() {
             put("apellido", apellido.value)
             put("telefono", telefono.value)
             put("ciudadOrigen", ciudad.value)
-            put("negocioId", 67)
+            put("negocioId", negocioId)
         }
 
         val metodoHttp = Request.Method.POST
@@ -91,7 +93,7 @@ class SellerViewModel : ViewModel() {
                     if (response.getBoolean("succeeded")) {
                         message.value =
                           "Vendedor agregado exitosamente"
-                        loadSeller(context)
+                        sellerGuardado.value = true
                         clearFields()
                     } else {
                         message.value = response.getString("message")
@@ -114,6 +116,10 @@ class SellerViewModel : ViewModel() {
 
     fun clearMessage() {
         message.value = null
+    }
+
+    fun resetSellerGuardado() {
+        sellerGuardado.value = false
     }
 
     fun clearFields() {

@@ -17,6 +17,7 @@ class ClientViewModel : ViewModel() {
 
     val clients = mutableStateListOf<Client>()
     var clienteId = mutableIntStateOf(0)
+    var clienteGuardado = mutableStateOf(false)
     var identificacion = mutableStateOf("")
     var nombres = mutableStateOf("")
     var primerApellido = mutableStateOf("")
@@ -125,6 +126,7 @@ class ClientViewModel : ViewModel() {
                     if (response.getBoolean("succeeded")) {
                         message.value = if (esActualizar) "Cliente actualizado exitosamente" else "Cliente agregado exitosamente"
                         clearFields()
+                        clienteGuardado.value = true
                     } else {
                         message.value = response.getString("message")
                     }
@@ -142,6 +144,9 @@ class ClientViewModel : ViewModel() {
         }
 
         rq.add(js)
+    }
+    fun resetClienteGuardado() {
+        clienteGuardado.value = false
     }
 
 

@@ -16,12 +16,13 @@ class CategoryViewModel : ViewModel() {
 
     val categories = mutableStateListOf<Category>()
     var nombre = mutableStateOf("")
+    var categoriaGuardada = mutableStateOf(false)
     var descripcion = mutableStateOf("")
     var message = mutableStateOf<String?>(null)
 
 
-    fun loadCategories(context: Context, pageNumber: Int = 1, pageSize: Int = 10) {
-        val url = "${Constants.BASE_URL}/Categoria?Tipo=PRODUCTO&NegocioId=67&pageNumber=$pageNumber&pageSize=$pageSize"
+    fun loadCategories(context: Context, negocioId: Int, pageNumber: Int = 1, pageSize: Int = 10) {
+        val url = "${Constants.BASE_URL}/Categoria?Tipo=PRODUCTO&NegocioId=${negocioId}&pageNumber=$pageNumber&pageSize=$pageSize"
 
         val rq = Volley.newRequestQueue(context)
 
@@ -58,14 +59,14 @@ class CategoryViewModel : ViewModel() {
         rq.add(js)
     }
 
-    fun saveCategory(context: Context) {
+    fun saveCategory(context: Context,  negocioId: Int,) {
         val url = "${Constants.BASE_URL}/Categoria"
 
         val datos = JSONObject().apply {
             put("nombre", nombre.value)
             put("descripcion", descripcion.value)
             put("tipo", "PRODUCTO")
-            put("negocioId", 67)
+            put("negocioId", negocioId)
         }
 
         val metodoHttp = Request.Method.POST
@@ -76,8 +77,8 @@ class CategoryViewModel : ViewModel() {
                 try {
                     if (response.getBoolean("succeeded")) {
                         message.value = "Categoría agregada exitosamente"
-                        loadCategories(context)
                         clearFields()
+                        categoriaGuardada.value = true
                     } else {
                         message.value = response.getString("message")
                     }
@@ -101,6 +102,10 @@ class CategoryViewModel : ViewModel() {
 
     fun clearMessage() {
         message.value = null
+    }
+
+    fun resetCategoriaGuardada() {
+        categoriaGuardada.value = false
     }
 
     fun clearFields() {

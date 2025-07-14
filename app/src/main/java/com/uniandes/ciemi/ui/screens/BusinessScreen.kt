@@ -1,5 +1,6 @@
 package com.uniandes.ciemi.ui.screens
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -7,9 +8,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.uniandes.ciemi.utils.Constants
 import com.uniandes.ciemi.view.BusinessViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,12 +21,15 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
     val context = LocalContext.current
     var search by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
+    val role = viewModel.role.value
     val business = viewModel.business
     val message by viewModel.message
 
     LaunchedEffect(true) {
         viewModel.loadBusiness(context)
+        viewModel.loadUserData(context)
         viewModel.loadCategories(context)
+        viewModel.loadEntrepreneur(context)
     }
 
     LaunchedEffect(message) {
@@ -43,7 +49,10 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                 viewModel.businessId.value = 0
                 showDialog = true
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0054A3)
+                    )
         ) {
             Text("Nuevo Negocio")
         }
@@ -69,7 +78,10 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                             search = search,
                         )
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0054A3)
+                    )
                 ) {
                     Text("Buscar")
                 }
@@ -90,11 +102,12 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                         Text("Teléfono: ${busines.telefono}")
                         Text("Estado: ${busines.estado}")
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = {
-                            viewModel.setBusinessEdit(busines)
-                            showDialog = true
-                        }) {
-                            Text("Editar")
+                        if(role == "Admin") {
+                            Button(onClick = {
+                                viewModel.aproveeBusiness(context, busines.id, true)
+                            }) {
+                                Text("Aprobar Negocio")
+                            }
                         }
                     }
                 }
@@ -126,40 +139,76 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                         onValueChange = { viewModel.telefono.value = it },
                         label = { Text("Telefono") },
                     )
-                    var expanded by remember { mutableStateOf(false) }
-                    val estados = listOf("Activo", "Inactivo")
+                    if(role == "Admin") {
+                        var expanded by remember { mutableStateOf(false) }
+                        val estados = listOf("Activo", "Inactivo")
 
+
+                        ExposedDropdownMenuBox(
+                            expanded = expanded,
+                            onExpandedChange = { expanded = !expanded }
+                        ) {
+                            OutlinedTextField(
+                                readOnly = true,
+                                value = viewModel.estado.value,
+                                onValueChange = { },
+                                label = { Text("Estado") },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                                },
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expanded,
+                                onDismissRequest = { expanded = false }
+                            ) {
+                                estados.forEach { estado ->
+                                    DropdownMenuItem(
+                                        text = { Text(estado) },
+                                        onClick = {
+                                            viewModel.estado.value = estado
+                                            expanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    var expandedEmprendedor by remember { mutableStateOf(false) }
                     ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded }
+                        expanded = expandedEmprendedor,
+                        onExpandedChange = { expandedEmprendedor = !expandedEmprendedor }
                     ) {
+                        val selectedEmprendedor = viewModel.emprendedores.find { it.id == viewModel.empresaSeleccionadaId.value }
                         OutlinedTextField(
                             readOnly = true,
-                            value = viewModel.estado.value,
-                            onValueChange = { },
-                            label = { Text("Estado") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-                            },
-                            modifier = Modifier
-                                .menuAnchor()
-                                .fillMaxWidth()
+                            value = selectedEmprendedor?.userName ?: "Seleccione un emprendedor",
+                            onValueChange = {},
+                            label = { Text("Emprendedor") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedEmprendedor) },
+                            modifier = Modifier.menuAnchor().fillMaxWidth()
                         )
                         ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
+                            expanded = expandedEmprendedor,
+                            onDismissRequest = { expandedEmprendedor = false }
                         ) {
-                            estados.forEach { estado ->
+                            viewModel.emprendedores.forEach { emprendedor ->
                                 DropdownMenuItem(
-                                    text = { Text(estado) },
+                                    text = { Text(emprendedor.userName) },
                                     onClick = {
-                                        viewModel.estado.value = estado
-                                        expanded = false
+                                        viewModel.empresaSeleccionadaId.value = emprendedor.id
+                                        expandedEmprendedor = false
                                     }
                                 )
                             }
                         }
                     }
+
                     var expandedCategoria by remember { mutableStateOf(false) }
 
                     ExposedDropdownMenuBox(
@@ -208,7 +257,11 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                         businessId = viewModel.businessId.value
                     )
                     showDialog = false
-                }) {
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0054A3)
+                    )
+                ) {
                     Text(if (viewModel.businessId.value == 0) "Guardar Negocio" else "Actualizar Negocio")
                 }
             },
