@@ -3,7 +3,8 @@ package com.uniandes.ciemi.model
 
 data class Stock (
     val id: Int,
-    val cantidad: Int,
+    var cantidad: Int,
+    var cantidadElegida: String,
     val producto: Product,
     val precioCompra: Double,
     val precioVenta: Double,

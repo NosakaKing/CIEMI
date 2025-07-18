@@ -48,6 +48,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
         DashboardSection.CLIENT -> "Clientes"
         DashboardSection.PRODUCT -> "Productos"
         DashboardSection.STOCK -> "Stock"
+        DashboardSection.SALES -> "Ventas"
         DashboardSection.BUSINESS -> "Negocios"
         DashboardSection.SETTINGS -> "Configuración"
     }
@@ -89,6 +90,11 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
                         label = { Text("Gestión de stock") },
                         selected = currentSection == DashboardSection.STOCK,
                         onClick = { viewModel.currentSection.value = DashboardSection.STOCK }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Gestión de ventas") },
+                        selected = currentSection == DashboardSection.SALES,
+                        onClick = { viewModel.currentSection.value = DashboardSection.SALES }
                     )
                     NavigationDrawerItem(
                         label = { Text("Gestión de vendedores") },
@@ -161,6 +167,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
                     DashboardSection.CLIENT -> ClientScreen()
                     DashboardSection.PRODUCT -> ProductScreen()
                     DashboardSection.STOCK -> StockScreen()
+                    DashboardSection.SALES -> SalesScreen()
                     DashboardSection.BUSINESS -> BusinessScreen()
                     DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
                 }

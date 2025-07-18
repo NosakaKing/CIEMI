@@ -63,6 +63,7 @@ class StockViewModel : ViewModel() {
                                 fechaIngreso = obj.getString("fechaIngreso"),
                                 fechaCaducidad = obj.getString("fechaCaducidad"),
                                 fechaElaboracion = obj.getString("fechaElaboracion"),
+                                cantidadElegida = "1",
                                 producto = producto
                             )
                         )
