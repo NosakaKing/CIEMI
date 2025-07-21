@@ -9,6 +9,7 @@ enum class DashboardSection {
     PRODUCT,
     STOCK,
     SALES,
+    SALESCONTROL,
     BUSINESS,
-    SETTINGS
+    SETTINGS,
 }

@@ -9,18 +9,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.uniandes.ciemi.utils.Constants
 import com.uniandes.ciemi.view.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
-                    businessSelectViewModel: BusinessSelectViewModel = viewModel(),
-                    navController: NavHostController
-                    ,
-
-                    ) {
+fun DashboardScreen(
+    viewModel: DashboardViewModel = viewModel(),
+    businessSelectViewModel: BusinessSelectViewModel = viewModel(),
+    navController: NavHostController
+) {
     val context = LocalContext.current
 
     val userName = viewModel.userName.value
@@ -33,12 +31,21 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
     }
 
     val negocioSeleccionado = viewModel.negocioSeleccionado.value
+
+    val estadoNegocio = negocioSeleccionado?.estado ?: ""
+    val puedeVerTodo = estadoNegocio != "Pendiente" && estadoNegocio != "Rechazado"
+
     LaunchedEffect(negocioSeleccionado) {
         if (negocioSeleccionado != null) {
             businessSelectViewModel.setNegocio(negocioSeleccionado)
         }
     }
 
+    val seccionesDisponibles = if (!puedeVerTodo) {
+        listOf(DashboardSection.HOME)
+    } else {
+        DashboardSection.values().toList()
+    }
 
     val topBarTitle = when (currentSection) {
         DashboardSection.HOME -> "Inicio"
@@ -49,6 +56,7 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
         DashboardSection.PRODUCT -> "Productos"
         DashboardSection.STOCK -> "Stock"
         DashboardSection.SALES -> "Ventas"
+        DashboardSection.SALESCONTROL -> "Lista de Ventas"
         DashboardSection.BUSINESS -> "Negocios"
         DashboardSection.SETTINGS -> "Configuración"
     }
@@ -64,58 +72,30 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
                 ) {
                     NegocioDropdown(viewModel)
 
-                    NavigationDrawerItem(
-                        label = { Text("Inicio") },
-                        selected = currentSection == DashboardSection.HOME,
-                        onClick = { viewModel.currentSection.value = DashboardSection.HOME }
-                    )
-                    if (role == "Admin") {
-                        NavigationDrawerItem(
-                            label = { Text("Gestión de usuarios") },
-                            selected = currentSection == DashboardSection.USERS,
-                            onClick = { viewModel.currentSection.value = DashboardSection.USERS }
-                        )
+                    seccionesDisponibles.forEach { section ->
+                        val label = when (section) {
+                            DashboardSection.HOME -> "Inicio"
+                            DashboardSection.USERS -> "Gestión de usuarios"
+                            DashboardSection.CATEGORY -> "Gestión de categorías"
+                            DashboardSection.SELLER -> "Gestión de vendedores"
+                            DashboardSection.CLIENT -> "Gestión de clientes"
+                            DashboardSection.PRODUCT -> "Gestión de productos"
+                            DashboardSection.STOCK -> "Gestión de stock"
+                            DashboardSection.SALES -> "Gestión de ventas"
+                            DashboardSection.SALESCONTROL -> "Lista de ventas"
+                            DashboardSection.BUSINESS -> "Gestión de negocios"
+                            DashboardSection.SETTINGS -> "Configuración"
+                        }
+
+                        if (section != DashboardSection.USERS || role == "Admin") {
+                            NavigationDrawerItem(
+                                label = { Text(label) },
+                                selected = currentSection == section,
+                                onClick = { viewModel.currentSection.value = section }
+                            )
+                        }
                     }
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de categorías") },
-                        selected = currentSection == DashboardSection.CATEGORY,
-                        onClick = { viewModel.currentSection.value = DashboardSection.CATEGORY }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de productos") },
-                        selected = currentSection == DashboardSection.PRODUCT,
-                        onClick = { viewModel.currentSection.value = DashboardSection.PRODUCT }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de stock") },
-                        selected = currentSection == DashboardSection.STOCK,
-                        onClick = { viewModel.currentSection.value = DashboardSection.STOCK }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de ventas") },
-                        selected = currentSection == DashboardSection.SALES,
-                        onClick = { viewModel.currentSection.value = DashboardSection.SALES }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de vendedores") },
-                        selected = currentSection == DashboardSection.SELLER,
-                        onClick = { viewModel.currentSection.value = DashboardSection.SELLER }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de clientes") },
-                        selected = currentSection == DashboardSection.CLIENT,
-                        onClick = { viewModel.currentSection.value = DashboardSection.CLIENT }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Gestión de negocios") },
-                        selected = currentSection == DashboardSection.BUSINESS,
-                        onClick = { viewModel.currentSection.value = DashboardSection.BUSINESS }
-                    )
-                    NavigationDrawerItem(
-                        label = { Text("Configuración") },
-                        selected = currentSection == DashboardSection.SETTINGS,
-                        onClick = { viewModel.currentSection.value = DashboardSection.SETTINGS }
-                    )
+
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = "Bienvenido, $userName",
@@ -159,17 +139,22 @@ fun DashboardScreen(viewModel: DashboardViewModel = viewModel(),
                     .padding(innerPadding)
                     .padding(12.dp)
             ) {
-                when (currentSection) {
-                    DashboardSection.HOME -> Text("Esta es la pantalla de inicio.")
-                    DashboardSection.USERS -> UserScreen()
-                    DashboardSection.CATEGORY -> CategoryScreen()
-                    DashboardSection.SELLER -> SellerScreen()
-                    DashboardSection.CLIENT -> ClientScreen()
-                    DashboardSection.PRODUCT -> ProductScreen()
-                    DashboardSection.STOCK -> StockScreen()
-                    DashboardSection.SALES -> SalesScreen()
-                    DashboardSection.BUSINESS -> BusinessScreen()
-                    DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
+                if (!puedeVerTodo) {
+                    OnHoldScreen()
+                } else {
+                    when (currentSection) {
+                        DashboardSection.HOME -> HomeScreen()
+                        DashboardSection.USERS -> UserScreen()
+                        DashboardSection.CATEGORY -> CategoryScreen()
+                        DashboardSection.SELLER -> SellerScreen()
+                        DashboardSection.CLIENT -> ClientScreen()
+                        DashboardSection.PRODUCT -> ProductScreen()
+                        DashboardSection.STOCK -> StockScreen()
+                        DashboardSection.SALES -> SalesScreen()
+                        DashboardSection.SALESCONTROL -> SalesTableScreen()
+                        DashboardSection.BUSINESS -> BusinessScreen()
+                        DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
+                    }
                 }
             }
         }

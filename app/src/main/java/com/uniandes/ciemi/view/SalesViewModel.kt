@@ -23,7 +23,6 @@ class SalesViewModel: ViewModel() {
     val products = mutableStateListOf<Product>()
     val primerApellido = mutableStateOf("")
     val segundoApellido = mutableStateOf("")
-    val cantidad =  mutableStateOf("")
     val correo = mutableStateOf("")
     val telefono = mutableStateOf("")
     val direccion = mutableStateOf("")
