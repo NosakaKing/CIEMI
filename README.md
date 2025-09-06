@@ -37,46 +37,28 @@ Permite a los usuarios registrar, actualizar y consultar productos de manera sen
 
 ## 🏛️ Archivos de la linea de base
 
-El proyecto sigue una arquitectura en capas limpia y modular, facilitando la separación de responsabilidades y la mantenibilidad:
+| Archivo / Carpeta       | Descripción |
+|--------------------------|-------------|
+| `.idea/`                | Configuración del proyecto para Android Studio/IntelliJ IDEA (preferencias del entorno, no afecta la lógica). |
+| `app/`                  | Carpeta principal de la aplicación Android. Contiene el código fuente en Kotlin, recursos (layouts, imágenes, strings) y configuración del módulo. |
+| `gradle/`               | Archivos y configuraciones internas del sistema de construcción Gradle. |
+| `.gitignore`            | Define qué archivos y carpetas deben ignorarse en Git (ejemplo: builds temporales, configuraciones locales). |
+| `README.md`             | Documento de introducción al proyecto, incluye instrucciones de instalación, uso y guías para desarrolladores. |
+| `build.gradle.kts`      | Archivo de configuración principal de Gradle (Kotlin DSL). Define dependencias, plugins y opciones de compilación. |
+| `gradle.properties`     | Variables y configuraciones globales para Gradle (ejemplo: versión de JVM, flags de compilación). |
+| `gradlew`               | Script de Gradle Wrapper para Linux/macOS. Permite ejecutar Gradle sin necesidad de instalarlo en el sistema. |
+| `gradlew.bat`           | Script de Gradle Wrapper para Windows. |
+| `settings.gradle.kts`   | Define los módulos incluidos en el proyecto (por ejemplo, `:app`) y configuración inicial de Gradle. |
 
 ---
 
-## 🔒 Seguridad
+## 📌 Próximo cambio aprobado (para v1.1)
 
-La seguridad es un pilar fundamental de esta API:
+Los siguientes cambios han sido aprobados para la próxima versión:
 
-* **Autenticación JWT:** Cada solicitud a un endpoint protegido requiere un token JWT válido en el encabezado `Authorization`.
-* **Cookies HTTP-only:** El token (`token`) se gestiona de forma segura mediante una cookie marcada como `HttpOnly` y `Secure`, lo que impide su acceso vía JavaScript y protege contra ataques XSS.
-
-* **Hashing de Contraseñas:** Las contraseñas de los usuarios nunca se almacenan en texto plano. Se utiliza `BCryptPasswordEncoder` para hashearlas antes de guardarlas en la base de datos.
-* **Autorización Flexible:** Los endpoints están configurados para permitir o requerir autenticación según su función (ej. registro y lista de tópicos públicos, creación de tópicos protegida).
-
----
-
-## 🖼️ Ejemplos en la Interfaz
-* **Login:**
-![TopicoNuevo](https://i.imgur.com/lsfdTp2.png)
-
-* **Nuevo Topico:**
-![TopicoNuevo](https://i.imgur.com/c0UokZk.png)
-
-* **Lista de Topicos:**
-![TopicoLista](https://i.imgur.com/Re0sIyF.png)
-
-* **Nuevo Comentario:**
-![Comentario](https://i.imgur.com/DVDAuPT.png)
-
-* **Lista de Comentarios:**
-![TopicoUno](https://i.imgur.com/C9z278a.png)
-
-## 🏛 Despliegue en Docker
-
-El proyecto está corriendo en un contenedor Docker y puedes probarlo usando el siguiente usuario de prueba:
-
-**Usuario:** `Usuario`  
-**Contraseña:** `Usuario123!`
-
-🌐 Accede al sitio aquí: [ForoHub en Azure](http://20.163.60.146/forohub)
+- Implementar generación de **PDF de la venta**.  
+- Agregar **detalles de la vista de ventas**.  
+- Incluir **paginado en las listas** para mejorar el rendimiento y la navegación.  
 
 ---
 
