@@ -3,9 +3,10 @@ package com.uniandes.ciemi.utils
 import android.content.Context
 import com.uniandes.ciemi.model.SelectBusiness
 import org.json.JSONObject
+import androidx.core.content.edit
 
 object Constants {
-    const val BASE_URL = "http://10.0.2.2:5002/api/v1"
+    const val BASE_URL = "http://192.168.0.14:5002/api/v1"
 
     fun getToken(context: Context): String {
         val sharedPref = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
@@ -45,7 +46,7 @@ object Constants {
 
     fun logout(context: Context) {
         val sharedPref = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)
-        sharedPref.edit().clear().apply()
+        sharedPref.edit { clear() }
     }
 
     fun nombreDelMes(numeroMes: Int): String {

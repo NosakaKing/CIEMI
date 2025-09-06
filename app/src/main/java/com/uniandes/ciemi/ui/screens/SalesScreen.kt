@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.*
@@ -16,11 +17,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.uniandes.ciemi.view.BusinessSelectViewModel
 import com.uniandes.ciemi.view.SalesViewModel
+import java.math.BigDecimal
+import java.math.RoundingMode
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesScreen(
@@ -168,7 +173,11 @@ fun SalesScreen(
             Text("Productos Seleccionados", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
 
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+            ) {
                 items(viewModel.productosSeleccionados) { producto ->
                     Card(
                         modifier = Modifier
@@ -183,10 +192,14 @@ fun SalesScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Column {
+                                val cantidad = producto.cantidadElegida.toIntOrNull() ?: 0
+                                val precio = BigDecimal(producto.precioVenta.toString())
+                                val total = precio.multiply(BigDecimal(cantidad)).setScale(2,
+                                    RoundingMode.HALF_UP)
                                 Text("Nombre: ${producto.producto.nombre}")
-                                Text("Cantidad: ${producto.cantidadElegida}")
-                                Text("Precio: ${producto.precioVenta}")
-                                Text("Total: ${producto.cantidadElegida.toInt() * producto.precioVenta}")
+                                Text("Cantidad: $cantidad")
+                                Text("Precio: $precio")
+                                Text("Total: $total")
                             }
                             Button(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
@@ -199,7 +212,11 @@ fun SalesScreen(
                                     ).show()
                                 }
                             ) {
-                                Text("Eliminar", color = Color.White)
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Eliminar",
+                                    tint = Color.White
+                                )
                             }
                         }
                     }
@@ -207,6 +224,14 @@ fun SalesScreen(
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
+        val subtotal = viewModel.calcularSubtotal()
+        val iva = viewModel.calcularIVA()
+        val total = viewModel.calcularTotal()
+
+        Text("Subtotal: $subtotal")
+        Text("IVA: $iva")
+        Text("Total: $total")
+
 
         Button(
             onClick = {

@@ -1,6 +1,7 @@
 package com.uniandes.ciemi.view
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -33,6 +34,8 @@ class HomeViewModel: ViewModel() {
     val sellerMes = mutableStateListOf<SellerMes>()
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val fechaHoy: String = sdf.format(Date())
+    val fechaInicio = mutableStateOf("2025-01-01")
+    val fechaFin = mutableStateOf(fechaHoy)
 
     private inline fun <reified T> fetchData(
         context: Context,
@@ -98,9 +101,6 @@ class HomeViewModel: ViewModel() {
     }
 
 
-
-
-
     fun loadEarningProducts(
         context: Context,
         negocioId: Int,
@@ -109,6 +109,8 @@ class HomeViewModel: ViewModel() {
         pageNumber: Int = 1,
         pageSize: Int = 10
     ) {
+        Log.d("HomeViewModel", "Cargando productos con Inicio=$fechaInicio y Fin=$fechaFin")
+
         val url = "${Constants.BASE_URL}/GananciasStats/gananciasPorProductos?" +
                 "FechaInicio=$fechaInicio&" +
                 "FechaFin=$fechaFin&" +

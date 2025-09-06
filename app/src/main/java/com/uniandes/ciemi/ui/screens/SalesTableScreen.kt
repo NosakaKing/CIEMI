@@ -32,16 +32,38 @@ fun SalesTableScreen(
         }
         return
     }
+    val fechaInicio = viewModel.fechaInicio
+    val fechaFin = viewModel.fechaFin
+
     LaunchedEffect(negocioSeleccionado) {
         viewModel.loadSales(context, negocioSeleccionado.id)
     }
+
     LaunchedEffect(message) {
         message?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.clearMessage()
         }
     }
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            DatePickerField("Fecha inicio", fechaInicio.value) { viewModel.fechaInicio.value = it }
+            DatePickerField("Fecha fin", fechaFin.value) { viewModel.fechaFin.value = it }
+        }
+
+        Button(
+            onClick = {
+                negocioSeleccionado.let {
+                    viewModel.loadSales(context, it.id, fechaInicio.value, fechaFin.value)
+                }
+            },
+            modifier = Modifier.padding(vertical = 8.dp)
+        ) {
+            Text("Filtrar")
+        }
 
         LazyColumn {
             items(sales) { sale ->
@@ -63,3 +85,4 @@ fun SalesTableScreen(
         }
     }
 }
+

@@ -235,6 +235,8 @@ class BusinessViewModel : ViewModel() {
         message.value = null
     }
 
+
+
     fun clearFields() {
         businessId.intValue = 0
         nombre.value = ""

@@ -1,6 +1,8 @@
 package com.uniandes.ciemi.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -41,15 +43,18 @@ fun DashboardScreen(
         }
     }
 
-    val seccionesDisponibles = if (!puedeVerTodo) {
-        listOf(DashboardSection.HOME)
-    } else {
-        DashboardSection.values().toList()
+    val seccionesDisponibles = when (role) {
+        "Admin" -> listOf(DashboardSection.HOME, DashboardSection.BUSINESS)
+        else -> if (!puedeVerTodo) {
+            listOf(DashboardSection.HOME)
+        } else {
+            DashboardSection.values().toList()
+        }
     }
+
 
     val topBarTitle = when (currentSection) {
         DashboardSection.HOME -> "Inicio"
-        DashboardSection.USERS -> "Usuarios"
         DashboardSection.CATEGORY -> "Categorías"
         DashboardSection.SELLER -> "Vendedores"
         DashboardSection.CLIENT -> "Clientes"
@@ -58,7 +63,6 @@ fun DashboardScreen(
         DashboardSection.SALES -> "Ventas"
         DashboardSection.SALESCONTROL -> "Lista de Ventas"
         DashboardSection.BUSINESS -> "Negocios"
-        DashboardSection.SETTINGS -> "Configuración"
     }
 
     ModalNavigationDrawer(
@@ -67,6 +71,7 @@ fun DashboardScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
                         .padding(vertical = 16.dp),
                     verticalArrangement = Arrangement.Top
                 ) {
@@ -75,7 +80,6 @@ fun DashboardScreen(
                     seccionesDisponibles.forEach { section ->
                         val label = when (section) {
                             DashboardSection.HOME -> "Inicio"
-                            DashboardSection.USERS -> "Gestión de usuarios"
                             DashboardSection.CATEGORY -> "Gestión de categorías"
                             DashboardSection.SELLER -> "Gestión de vendedores"
                             DashboardSection.CLIENT -> "Gestión de clientes"
@@ -84,16 +88,13 @@ fun DashboardScreen(
                             DashboardSection.SALES -> "Gestión de ventas"
                             DashboardSection.SALESCONTROL -> "Lista de ventas"
                             DashboardSection.BUSINESS -> "Gestión de negocios"
-                            DashboardSection.SETTINGS -> "Configuración"
                         }
 
-                        if (section != DashboardSection.USERS || role == "Admin") {
                             NavigationDrawerItem(
                                 label = { Text(label) },
                                 selected = currentSection == section,
                                 onClick = { viewModel.currentSection.value = section }
                             )
-                        }
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
@@ -111,6 +112,7 @@ fun DashboardScreen(
 
                     Button(
                         onClick = {
+                            viewModel.clearSession()
                             Constants.logout(context)
                             navController.navigate("login") {
                                 popUpTo(0)
@@ -144,7 +146,6 @@ fun DashboardScreen(
                 } else {
                     when (currentSection) {
                         DashboardSection.HOME -> HomeScreen()
-                        DashboardSection.USERS -> UserScreen()
                         DashboardSection.CATEGORY -> CategoryScreen()
                         DashboardSection.SELLER -> SellerScreen()
                         DashboardSection.CLIENT -> ClientScreen()
@@ -153,7 +154,6 @@ fun DashboardScreen(
                         DashboardSection.SALES -> SalesScreen()
                         DashboardSection.SALESCONTROL -> SalesTableScreen()
                         DashboardSection.BUSINESS -> BusinessScreen()
-                        DashboardSection.SETTINGS -> Text("Configuración de la cuenta.")
                     }
                 }
             }

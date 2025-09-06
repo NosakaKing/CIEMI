@@ -177,34 +177,42 @@ fun BusinessScreen(viewModel: BusinessViewModel = viewModel()) {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
 
-                    var expandedEmprendedor by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = expandedEmprendedor,
-                        onExpandedChange = { expandedEmprendedor = !expandedEmprendedor }
-                    ) {
-                        val selectedEmprendedor = viewModel.emprendedores.find { it.id == viewModel.empresaSeleccionadaId.value }
-                        OutlinedTextField(
-                            readOnly = true,
-                            value = selectedEmprendedor?.userName ?: "Seleccione un emprendedor",
-                            onValueChange = {},
-                            label = { Text("Emprendedor") },
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedEmprendedor) },
-                            modifier = Modifier.menuAnchor().fillMaxWidth()
-                        )
-                        ExposedDropdownMenu(
+                        Spacer(modifier = Modifier.height(8.dp))
+                    if(role == "Admin") {
+                        var expandedEmprendedor by remember { mutableStateOf(false) }
+                        ExposedDropdownMenuBox(
                             expanded = expandedEmprendedor,
-                            onDismissRequest = { expandedEmprendedor = false }
+                            onExpandedChange = { expandedEmprendedor = !expandedEmprendedor }
                         ) {
-                            viewModel.emprendedores.forEach { emprendedor ->
-                                DropdownMenuItem(
-                                    text = { Text(emprendedor.userName) },
-                                    onClick = {
-                                        viewModel.empresaSeleccionadaId.value = emprendedor.id
-                                        expandedEmprendedor = false
-                                    }
-                                )
+                            val selectedEmprendedor =
+                                viewModel.emprendedores.find { it.id == viewModel.empresaSeleccionadaId.value }
+                            OutlinedTextField(
+                                readOnly = true,
+                                value = selectedEmprendedor?.userName
+                                    ?: "Seleccione un emprendedor",
+                                onValueChange = {},
+                                label = { Text("Emprendedor") },
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(
+                                        expandedEmprendedor
+                                    )
+                                },
+                                modifier = Modifier.menuAnchor().fillMaxWidth()
+                            )
+                            ExposedDropdownMenu(
+                                expanded = expandedEmprendedor,
+                                onDismissRequest = { expandedEmprendedor = false }
+                            ) {
+                                viewModel.emprendedores.forEach { emprendedor ->
+                                    DropdownMenuItem(
+                                        text = { Text(emprendedor.userName) },
+                                        onClick = {
+                                            viewModel.empresaSeleccionadaId.value = emprendedor.id
+                                            expandedEmprendedor = false
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

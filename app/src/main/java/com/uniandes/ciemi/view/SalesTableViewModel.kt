@@ -17,7 +17,8 @@ class SalesTableViewModel  : ViewModel() {
     val sales = mutableStateListOf<Sales>()
     val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val fechaHoy: String = sdf.format(Date())
-
+    val fechaInicio = mutableStateOf("2025-01-01")
+    val fechaFin = mutableStateOf(fechaHoy)
     fun loadSales(
         context: Context,
         negocioId: Int,

@@ -45,4 +45,11 @@ class DashboardViewModel : ViewModel() {
     fun setNegocio(negocio: SelectBusiness) {
         negocioSeleccionado.value = negocio
     }
+
+    fun clearSession() {
+        userName.value = ""
+        role.value = ""
+        currentSection.value = DashboardSection.HOME
+        negocioSeleccionado.value = null
+    }
 }

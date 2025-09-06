@@ -13,6 +13,8 @@ import com.uniandes.ciemi.model.Stock
 import com.uniandes.ciemi.utils.Constants
 import org.json.JSONArray
 import org.json.JSONObject
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 class SalesViewModel: ViewModel() {
     val idCliente = mutableIntStateOf(0)
@@ -158,11 +160,14 @@ class SalesViewModel: ViewModel() {
 
         val detallesArray = JSONArray()
         productosSeleccionados.forEach { stock ->
+            val cantidad = stock.cantidadElegida.toIntOrNull() ?: 0
+            val precio = BigDecimal(stock.precioVenta.toString())
+            val total = precio.multiply(BigDecimal(cantidad)).setScale(2, RoundingMode.HALF_UP)
             val detalle = JSONObject().apply {
                 put("productoId", stock.producto.id)
-                put("cantidad", stock.cantidadElegida.toIntOrNull() ?: 0)
-                put("precio", stock.precioVenta)
-                put("total", stock.cantidadElegida.toInt() * stock.precioVenta)
+                put("cantidad", cantidad)
+                put("precio",precio)
+                put("total", total)
                 put("stockId", stock.id)
             }
             detallesArray.put(detalle)
@@ -205,6 +210,28 @@ class SalesViewModel: ViewModel() {
         rq.add(js)
     }
 
+    fun calcularSubtotal(): BigDecimal {
+        return productosSeleccionados.fold(BigDecimal.ZERO) { acc, stock ->
+            val cantidad = stock.cantidadElegida.toIntOrNull() ?: 0
+            val totalProducto = BigDecimal(stock.precioVenta.toString()).multiply(BigDecimal(cantidad))
+            acc.add(totalProducto)
+        }.setScale(2, RoundingMode.HALF_UP)
+    }
+
+    fun calcularIVA(): BigDecimal {
+        return productosSeleccionados.fold(BigDecimal.ZERO) { acc, stock ->
+            val cantidad = stock.cantidadElegida.toIntOrNull() ?: 0
+            val totalProducto = BigDecimal(stock.precioVenta.toString()).multiply(BigDecimal(cantidad))
+            val porcentajeIVA = BigDecimal(stock.producto.iva ?: 0.0)
+            acc.add(totalProducto.multiply(porcentajeIVA.divide(BigDecimal(100)) ))
+        }.setScale(2, RoundingMode.HALF_UP)
+    }
+
+    fun calcularTotal(): BigDecimal {
+        val subtotal = calcularSubtotal()
+        val totalIVA = calcularIVA()
+        return subtotal.add(totalIVA).setScale(2, RoundingMode.HALF_UP)
+    }
 
 
     fun clearMessage() {
