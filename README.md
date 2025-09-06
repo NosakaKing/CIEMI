@@ -62,4 +62,3 @@ Los siguientes cambios han sido aprobados para la próxima versión:
 
 ---
 
-💡 **Tip:** Si quieres probar creando temas o comentarios, usa este usuario de prueba para no afectar datos reales.
