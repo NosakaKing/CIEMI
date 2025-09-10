@@ -11,6 +11,7 @@ import com.uniandes.ciemi.data.repository.ProductRepository
 import com.uniandes.ciemi.model.Product
 import com.uniandes.ciemi.model.Stock
 import com.uniandes.ciemi.utils.Constants
+import com.uniandes.ciemi.utils.PdfUtils
 import org.json.JSONArray
 import org.json.JSONObject
 import java.math.BigDecimal
@@ -179,15 +180,14 @@ class SalesViewModel: ViewModel() {
             put("fecha", java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date()))
             put("detalles", detallesArray)
         }
-
-        println(datos.toString(4))
-
         val rq = Volley.newRequestQueue(context)
         val js = object : JsonObjectRequest(Method.POST, url, datos,
             { response ->
                 try {
                     if (response.getBoolean("succeeded")) {
                         message.value = "Venta registrada correctamente"
+                        println("ID Venta: ${response.getInt("data")}")
+                        downloadSalePDF(context, response.getInt("data"))
                         loadStock(context, negocioId)
                         cleanFields()
                         productosSeleccionados.clear()
@@ -232,6 +232,17 @@ class SalesViewModel: ViewModel() {
         val totalIVA = calcularIVA()
         return subtotal.add(totalIVA).setScale(2, RoundingMode.HALF_UP)
     }
+
+    fun downloadSalePDF(context: Context, idSales: Int?) {
+        if (idSales == null) return
+
+        val url = "${Constants.BASE_URL}/Venta/GenerarNotaPDF?Ventaid=$idSales"
+        val fileName = "venta_${idSales}.pdf"
+        val headers = Constants.getAuthHeaders(context)
+
+        PdfUtils.downloadAndOpenPDF(context, url, fileName, headers)
+    }
+
 
 
     fun clearMessage() {

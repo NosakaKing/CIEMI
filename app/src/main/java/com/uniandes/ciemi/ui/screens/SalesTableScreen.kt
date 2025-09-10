@@ -4,12 +4,13 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -32,11 +33,22 @@ fun SalesTableScreen(
         }
         return
     }
+
     val fechaInicio = viewModel.fechaInicio
     val fechaFin = viewModel.fechaFin
 
-    LaunchedEffect(negocioSeleccionado) {
-        viewModel.loadSales(context, negocioSeleccionado.id)
+    var currentPage by remember { mutableIntStateOf(1) }
+    val pageSize = 10
+
+    LaunchedEffect(negocioSeleccionado, currentPage) {
+        viewModel.loadSales(
+            context,
+            negocioSeleccionado.id,
+            fechaInicio.value,
+            fechaFin.value,
+            pageNumber = currentPage,
+            pageSize = pageSize
+        )
     }
 
     LaunchedEffect(message) {
@@ -56,8 +68,16 @@ fun SalesTableScreen(
 
         Button(
             onClick = {
+                currentPage = 1
                 negocioSeleccionado.let {
-                    viewModel.loadSales(context, it.id, fechaInicio.value, fechaFin.value)
+                    viewModel.loadSales(
+                        context,
+                        it.id,
+                        fechaInicio.value,
+                        fechaFin.value,
+                        pageNumber = currentPage,
+                        pageSize = pageSize
+                    )
                 }
             },
             modifier = Modifier.padding(vertical = 8.dp)
@@ -79,10 +99,30 @@ fun SalesTableScreen(
                         Text("Fecha: ${sale.fecha}")
                         Text("Subtotal: ${sale.subtotal}")
                         Text("Total: ${sale.total}")
+                        Button(
+                            colors = ButtonDefaults.buttonColors(),
+                            onClick = {
+                                viewModel.downloadSalePDF(context, sale.id)
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.PictureAsPdf,
+                                contentDescription = "Eliminar",
+                                tint = Color.White
+                            )
+                        }
                     }
                 }
+            }
+            item {
+                PaginationControls(
+                    currentPage = currentPage,
+                    pageSize = pageSize,
+                    itemsLoaded = sales.size,
+                    onPrevious = { if (currentPage > 1) currentPage-- },
+                    onNext = { currentPage++ }
+                )
             }
         }
     }
 }
-

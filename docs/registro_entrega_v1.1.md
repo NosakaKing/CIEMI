@@ -31,7 +31,7 @@ Generar PDF de la venta, detalles de la vista de ventas y paginado en las listas
 ## 🏛️ Observaciones del equipo
 
 ---
-
+3
 ## 📌 Validación del docente
 
 Revisión realizada por:

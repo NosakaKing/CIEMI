@@ -6,7 +6,7 @@ import org.json.JSONObject
 import androidx.core.content.edit
 
 object Constants {
-    const val BASE_URL = "http://192.168.0.14:5002/api/v1"
+    const val BASE_URL = "http://10.0.2.2:5002/api/v1"
 
     fun getToken(context: Context): String {
         val sharedPref = context.getSharedPreferences("user_data", Context.MODE_PRIVATE)

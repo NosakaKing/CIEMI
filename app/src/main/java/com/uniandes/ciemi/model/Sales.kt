@@ -2,6 +2,7 @@ package com.uniandes.ciemi.model
 
 
 data class Sales(
+    val id: Int?,
     val fecha: String,
     val subtotal: String,
     val total: String,

@@ -8,6 +8,7 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.uniandes.ciemi.model.Sales
 import com.uniandes.ciemi.utils.Constants
+import com.uniandes.ciemi.utils.PdfUtils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -44,6 +45,7 @@ class SalesTableViewModel  : ViewModel() {
                         val obj = array.getJSONObject(i)
                         sales.add(
                             Sales(
+                                id = obj.getInt("id"),
                                 fecha = obj.getString("fecha"),
                                 subtotal = obj.getString("subtotal"),
                                 total = obj.getString("total"),
@@ -69,6 +71,18 @@ class SalesTableViewModel  : ViewModel() {
 
         rq.add(js)
     }
+
+    fun downloadSalePDF(context: Context, idSales: Int?) {
+        if (idSales == null) return
+
+        val url = "${Constants.BASE_URL}/Venta/GenerarNotaPDF?Ventaid=$idSales"
+        val fileName = "venta_${idSales}.pdf"
+        val headers = Constants.getAuthHeaders(context)
+
+        PdfUtils.downloadAndOpenPDF(context, url, fileName, headers)
+    }
+
+
 
     fun clearMessage() {
         message.value = null
