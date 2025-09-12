@@ -24,4 +24,3 @@ Este documento acompaña al **Release v1.1 – Exportar lista de Ventas a PDF**,
 
 ---
 
-*Este archivo debe ser completado y entregado por cada equipo como parte de su Release v1.1.*
