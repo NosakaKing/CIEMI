@@ -6,10 +6,10 @@ Cada equipo debe marcar los ítems cumplidos (✔️) o pendientes (❌).
 ---
 
 ## 🔹 Verificación técnica
-- [ x ] El código compila/ejecuta sin errores.  
-- [ x ] Se creó el archivo `app/src/view/SalesViewModel.kt` con la función de exportar Factura a PDF.  
-- [ x ] Se mantuvo intacto el código de la línea base v1.0 (`app/src/view/SalesScreen.kt`).  
-- [  ] Se actualizaron/añadieron comentarios en el código.  
+- [x] El código compila/ejecuta sin errores.  
+- [x] Se creó el archivo `app/src/view/SalesViewModel.kt` con la función de exportar Factura a PDF.  
+- [x] Se mantuvo intacto el código de la línea base v1.0 (`app/src/view/SalesScreen.kt`).  
+- [ ] Se actualizaron/añadieron comentarios en el código.  
 
 ---
 
