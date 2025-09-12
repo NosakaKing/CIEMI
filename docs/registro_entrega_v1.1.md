@@ -21,7 +21,7 @@ Generar PDF de la venta, detalles de la vista de ventas y paginado en las listas
 
 ## 🛠 Documentos entregados
 
-- [ ] Código fuente completo en el repositorio de GitHub.
+- [x] Código fuente completo en el repositorio de GitHub.
 - [x] Documentación técnica actualizada en el repositorio.
 - [x] Instrucciones de instalación y uso en el archivo `docs/README_v1_1.md`
 - [ ] Checklist de liberación `docs/checklist_pre_release_v1_1.md`
