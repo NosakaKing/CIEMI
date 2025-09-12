@@ -1,13 +1,12 @@
 # Documentación – Cambio v1.1
 
-Este documento acompaña al **Release v1.1 – Exportar lista de tareas a PDF**, 
-parte de la práctica de la **Semana 6 – Gestión de la Configuración de Software (UNIANDES)**.
+Este documento acompaña al **Release v1.1 – Exportar lista de Ventas a PDF**, 
 
 ---
 
 ## Descripción del cambio
-- Funcionalidad implementada: **exportar lista de tareas a PDF** (simulado).
-- Archivo(s) involucrados: `src/exportar.py` (nuevo).
+- Funcionalidad implementada: **exportar lista de ventas a PDF** , **paginado en listas**.
+- Archivo(s) involucrados: `app/src/view/SalesViewModel.kt` (nuevo).
 - Impacto: se añade una funcionalidad **nueva** sobre la línea base v1.0, sin afectar el comportamiento existente.
 
 ---
